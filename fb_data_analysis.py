@@ -11,7 +11,7 @@ from PIL import Image
 from wordcloud import WordCloud
 from nltk.corpus import stopwords
 
-def excel_to_csv(excel_file):
+def excel_csv(excel_file):
     sheets = pd.read_excel(excel_file, sheet_name=None)
     path_output = '/home/arthurbrito/Downloads'
 
@@ -21,9 +21,9 @@ def excel_to_csv(excel_file):
         print(f'Sheet "{sheet_name}" salva como {csv_file}')
 
 path_excel = '/home/arthurbrito/Downloads/Growth-Internship-Test.xlsx'
-excel_to_csv(path_excel)
+excel_csv(path_excel)
 
-def csv_to_dataframe(csv_file):
+def csv_dataframe(csv_file):
     df = pd.read_csv(csv_file)
     return df
 
@@ -31,26 +31,23 @@ PATH_BY_AGE = '/home/arthurbrito/Downloads/BY AGE.csv'
 PATH_BY_COUNTRY = '/home/arthurbrito/Downloads/BY COUNTRY.csv'
 PATH_BY_PLATFORM = '/home/arthurbrito/Downloads/BY PLATFORM.csv'
 
-by_age_df = csv_to_dataframe(PATH_BY_AGE)
-by_country_df = csv_to_dataframe(PATH_BY_COUNTRY)
-by_platform_df = csv_to_dataframe(PATH_BY_PLATFORM)
+by_age_df = csv_dataframe(PATH_BY_AGE)
+by_country_df = csv_dataframe(PATH_BY_COUNTRY)
+by_platform_df = csv_dataframe(PATH_BY_PLATFORM)
 
 by_age_df.head()
-
 by_age_df.info()
 
 by_age_unique = len(by_age_df['Ad Set Name'].unique())
 print(by_age_unique)
 
 by_country_df.head()
-
 by_country_df.info()
 
 by_county_unique = len(by_country_df['Ad Set Name'].unique())
 print(by_county_unique)
 
 by_platform_df.head()
-
 by_platform_df.info()
 
 by_platform_unique = len(by_platform_df['Ad Set Name'].unique())
@@ -59,51 +56,51 @@ print(by_platform_unique)
 data_dictionary = {
     "Ad Set Name": {
         "dtype": "object",
-        "description": "Nome do conjunto de anúncios."
+        "description": "Conjunto de anúncios"
     },
     "Country": {
         "dtype": "object",
-        "description": "País onde os anúncios foram exibidos."
+        "description": "Países onde os anuncios rodaram"
     },
     "Result Rate": {
         "dtype": "float64",
-        "description": "Taxa de resultados gerados pelos anúncios."
+        "description": "Taxa de resultados"
     },
     "Result Indicator": {
         "dtype": "object",
-        "description": "Indicador que representa o tipo de resultado obtido (ex: cliques, conversões)."
+        "description": "Indicador do tipo de resultado"
     },
     "Results": {
         "dtype": "int64",
-        "description": "Número total de resultados alcançados com os anúncios."
+        "description": "Número total de resultados"
     },
     "Reach": {
         "dtype": "int64",
-        "description": "Número de pessoas únicas que visualizaram os anúncios."
+        "description": "Números de visualizações únicas"
     },
     "Frequency": {
         "dtype": "float64",
-        "description": "Número médio de vezes que cada pessoa viu os anúncios."
+        "description": "Frequência média de visualizações do anuncio por pessoa"
     },
     "Link Clicks": {
         "dtype": "int64",
-        "description": "Número total de cliques no link dos anúncios."
+        "description": "Número de cliques no link do anúncio"
     },
     "CPC (Link) (USD)": {
         "dtype": "float64",
-        "description": "Custo por clique em links, em dólares americanos."
+        "description": "Custo por click no link"
     },
     "CPC (All) (USD)": {
         "dtype": "float64",
-        "description": "Custo por clique em geral, em dólares americanos."
+        "description": "Custo por clique no geral"
     },
     "Cost per 1,000 People Reached (USD)": {
         "dtype": "float64",
-        "description": "Custo para alcançar 1.000 pessoas, em dólares americanos."
+        "description": "Custo a cada 1000 pessoas alcançadas"
     },
     "CTR (All)": {
         "dtype": "float64",
-        "description": "Taxa de cliques em relação ao número total de impressões."
+        "description": "Taxa de cliques sobre o número total de impressões do anúncio"
     },
     "Add to Cart (Facebook Pixel)": {
         "dtype": "int64",
@@ -139,25 +136,20 @@ data_dictionary = {
     }
 }
 
-def clean_dataframe(df):
-
+def limpar_dataframe(df):
     df = df.dropna()
-    print("Linhas com valores NaN foram removidas.")
-
+    print("Linhas com valores inválidos foram removidas.")
     duplicate_counts = df.duplicated().sum()
     if duplicate_counts > 0:
         print(f"Linhas duplicadas encontradas: {duplicate_counts}. Removendo linhas duplicadas.")
         df = df.drop_duplicates()
     else:
         print(f"Não há linhas duplicadas.")
-
     return df
 
-by_age_df_cleaned = clean_dataframe(by_age_df)
-
-by_country_df_cleaned = clean_dataframe(by_country_df)
-
-by_platform_df_cleaned = clean_dataframe(by_platform_df)
+bg_age_df_limpo = limpar_dataframe(by_age_df)
+by_country_df_limpo = limpar_dataframe(by_country_df)
+by_platform_df_limpo = limpar_dataframe(by_platform_df)
 
 def substituir_ad_set_por_grupo(df, coluna_ad_set='Ad Set Name'):
     def classificar_grupo(ad_set_name):
@@ -183,7 +175,7 @@ def substituir_ad_set_por_grupo(df, coluna_ad_set='Ad Set Name'):
 
     return df
 
-by_age_df_refatorado = substituir_ad_set_por_grupo(by_age_df_cleaned)
+by_age_df_refatorado = substituir_ad_set_por_grupo(bg_age_df_limpo)
 
 by_age_df_refatorado = by_age_df_refatorado.rename(columns={
     "Platform": "platform",
@@ -215,7 +207,7 @@ by_age_df_refatorado.head()
 
 by_age_df_refatorado.info()
 
-by_country_df_refatorado = substituir_ad_set_por_grupo(by_country_df_cleaned)
+by_country_df_refatorado = substituir_ad_set_por_grupo(by_country_df_limpo)
 
 by_country_df_refatorado = by_country_df_refatorado.rename(columns={
     "Country": "country",
@@ -246,7 +238,7 @@ by_country_df_refatorado.head()
 
 by_country_df_refatorado.info()
 
-by_platform_df_refatorado = substituir_ad_set_por_grupo(by_platform_df_cleaned)
+by_platform_df_refatorado = substituir_ad_set_por_grupo(by_platform_df_limpo)
 
 by_platform_df_refatorado = by_platform_df_refatorado.rename(columns={
     "Platform": "platform",
