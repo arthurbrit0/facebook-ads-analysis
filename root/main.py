@@ -1,31 +1,20 @@
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
-import os
 import seaborn as sns
 import plotly.express as px
-from sklearn.metrics import confusion_matrix
 from sklearn.cluster import KMeans
-from PIL import Image
-from wordcloud import WordCloud
-from nltk.corpus import stopwords
-
-def excel_csv(excel_file):
-    sheets = pd.read_excel(excel_file, sheet_name=None)
-    path_output = '/home/arthurbrito/Downloads'
-
-    for sheet_name, data in sheets.items():
-        csv_file = os.path.join(path_output, f'{sheet_name}.csv')
-        data.to_csv(csv_file, index=False)
-        print(f'Sheet "{sheet_name}" salva como {csv_file}')
+from root.data.excel_to_csv import excel_csv
+from root.data.csv_dataframe import csv_dataframe
+from root.data.limpar_dataframe import limpar_dataframe
+from root.analysis.substituir_ad_set_por_grupo import substituir_ad_set_por_grupo
+from root.data.save_df_to_csv import save_df_to_csv
+from root.data.std_dados import std_dados
+from root.visualization.correlation_matrix import plot_correlation_matrix
+from root.consts.data_dictionary import data_dictionary
 
 path_excel = '/home/arthurbrito/Downloads/Growth-Internship-Test.xlsx'
 excel_csv(path_excel)
-
-def csv_dataframe(csv_file):
-    df = pd.read_csv(csv_file)
-    return df
 
 PATH_BY_AGE = '/home/arthurbrito/Downloads/BY AGE.csv'
 PATH_BY_COUNTRY = '/home/arthurbrito/Downloads/BY COUNTRY.csv'
@@ -53,127 +42,9 @@ by_platform_df.info()
 by_platform_unique = len(by_platform_df['Ad Set Name'].unique())
 print(by_platform_unique)
 
-data_dictionary = {
-    "Ad Set Name": {
-        "dtype": "object",
-        "description": "Conjunto de anúncios"
-    },
-    "Country": {
-        "dtype": "object",
-        "description": "Países onde os anuncios rodaram"
-    },
-    "Result Rate": {
-        "dtype": "float64",
-        "description": "Taxa de resultados"
-    },
-    "Result Indicator": {
-        "dtype": "object",
-        "description": "Indicador do tipo de resultado"
-    },
-    "Results": {
-        "dtype": "int64",
-        "description": "Número total de resultados"
-    },
-    "Reach": {
-        "dtype": "int64",
-        "description": "Números de visualizações únicas"
-    },
-    "Frequency": {
-        "dtype": "float64",
-        "description": "Frequência média de visualizações do anuncio por pessoa"
-    },
-    "Link Clicks": {
-        "dtype": "int64",
-        "description": "Número de cliques no link do anúncio"
-    },
-    "CPC (Link) (USD)": {
-        "dtype": "float64",
-        "description": "Custo por click no link"
-    },
-    "CPC (All) (USD)": {
-        "dtype": "float64",
-        "description": "Custo por clique no geral"
-    },
-    "Cost per 1,000 People Reached (USD)": {
-        "dtype": "float64",
-        "description": "Custo a cada 1000 pessoas alcançadas"
-    },
-    "CTR (All)": {
-        "dtype": "float64",
-        "description": "Taxa de cliques sobre o número total de impressões do anúncio"
-    },
-    "Add to Cart (Facebook Pixel)": {
-        "dtype": "int64",
-        "description": "Número de adições ao carrinho rastreadas pelo Facebook Pixel."
-    },
-    "Cost per Add To Cart (Facebook Pixel) (USD)": {
-        "dtype": "float64",
-        "description": "Custo por cada adição ao carrinho, em dólares americanos."
-    },
-    "Initiate Checkout (Facebook Pixel)": {
-        "dtype": "int64",
-        "description": "Número de inícios de checkout rastreados pelo Facebook Pixel."
-    },
-    "Cost per Initiate Checkout (Facebook Pixel) (USD)": {
-        "dtype": "float64",
-        "description": "Custo por cada início de checkout, em dólares americanos."
-    },
-    "Purchase (Facebook Pixel)": {
-        "dtype": "int64",
-        "description": "Número de compras rastreadas pelo Facebook Pixel."
-    },
-    "Cost per Purchase (Facebook Pixel) (USD)": {
-        "dtype": "float64",
-        "description": "Custo por cada compra, em dólares americanos."
-    },
-    "Amount Spent (USD)": {
-        "dtype": "float64",
-        "description": "Total gasto em anúncios, em dólares americanos."
-    },
-    "Purchase Conversion Value (Facebook Pixel)": {
-        "dtype": "float64",
-        "description": "Valor total das conversões de compras rastreadas pelo Facebook Pixel."
-    }
-}
-
-def limpar_dataframe(df):
-    df = df.dropna()
-    print("Linhas com valores inválidos foram removidas.")
-    duplicate_counts = df.duplicated().sum()
-    if duplicate_counts > 0:
-        print(f"Linhas duplicadas encontradas: {duplicate_counts}. Removendo linhas duplicadas.")
-        df = df.drop_duplicates()
-    else:
-        print(f"Não há linhas duplicadas.")
-    return df
-
 bg_age_df_limpo = limpar_dataframe(by_age_df)
 by_country_df_limpo = limpar_dataframe(by_country_df)
 by_platform_df_limpo = limpar_dataframe(by_platform_df)
-
-def substituir_ad_set_por_grupo(df, coluna_ad_set='Ad Set Name'):
-    def classificar_grupo(ad_set_name):
-        if isinstance(ad_set_name, str):
-            ad_set_name = ad_set_name.upper()
-            if ad_set_name.startswith('LC'):
-                return 'Lookalike Conversion'
-            elif ad_set_name.startswith('ADD TO CART'):
-                return 'Add to cart'
-            elif ad_set_name.startswith('VIEWED'):
-                return 'Viewed'
-            elif any(termo in ad_set_name for termo in ['EUROPE', 'W -', 'WW']):
-                return 'Segmentação Demográfica e Geográfica'
-            elif ad_set_name.startswith('INSTAGRAM POST'):
-                return 'Instagram Campanha'
-            elif ad_set_name.startswith('RL Cart-Conversion'):
-                return 'Remarketing to add cart'
-            else:
-                return 'Outros'
-        else:
-            return 'Desconhecido'
-    df['group_campanha'] = df[coluna_ad_set].apply(classificar_grupo)
-
-    return df
 
 by_age_df_refatorado = substituir_ad_set_por_grupo(bg_age_df_limpo)
 
@@ -293,34 +164,6 @@ by_country_df_refatorado = by_country_df_refatorado[['group_campanha', 'country_
                                                      'purchase_conversion_value']]
 by_country_df_refatorado.head(10)
 
-def std_dados(df):
-    df_normalizado = df.copy()
-
-    selected_columns = [
-    'result_rate',
-    'results',
-    'reach',
-    'frequency',
-    'link_clicks',
-    'ctr_all',
-    'add_to_cart',
-    'initiate_checkout',
-    'purchase',
-    'amount_spent_usd',
-    'purchase_conversion_value'
-]
-
-    for col in selected_columns:
-        if col in df.columns:
-            media = df[col].mean()
-            desvio_padrao = df[col].std()
-            df_normalizado[col + '_std'] = (df[col] - media) / desvio_padrao
-    colunas_normalizadas = ['group_campanha'] + [col + '_std' for col in selected_columns if col in df.columns]
-
-    df_normalizado = df_normalizado[colunas_normalizadas]
-
-    return df_normalizado
-
 by_age_df_std = std_dados(by_age_df_refatorado)
 by_country_df_std = std_dados(by_country_df_refatorado)
 by_platform_df_std = std_dados(by_platform_df_refatorado)
@@ -345,16 +188,6 @@ with sns.axes_style('whitegrid'):
   grafico = sns.lineplot(x=range(1, 11), y=wcss, marker="8", palette="pastel")
   grafico.set(title='Elbow Method', ylabel='WCSS', xlabel='Qtd. clusters')
 
-def save_df_to_csv(df, file_name):
-    folder_path = '/home/arthurbrito/Downloads'
-
-    if not os.path.exists(folder_path):
-        raise Exception(f"A pasta '{folder_path}' não existe.")
-
-    file_path = os.path.join(folder_path, file_name)
-
-    df.to_csv(file_path, index=False)
-
 save_df_to_csv(by_age_df_refatorado, 'by_age_refatorado.csv')
 save_df_to_csv(by_country_df_refatorado, 'by_country_refatorado.csv')
 save_df_to_csv(by_platform_df_refatorado, 'by_platform_refatorado.csv')
@@ -362,16 +195,6 @@ save_df_to_csv(by_platform_df_refatorado, 'by_platform_refatorado.csv')
 save_df_to_csv(by_age_df_std, 'by_age_std.csv')
 save_df_to_csv(by_country_df_std, 'by_country_std.csv')
 save_df_to_csv(by_platform_df_std, 'by_platform_std.csv')
-
-def plot_correlation_matrix(df, selected_columns, title='Matriz de Correlação'):
-    correlation_matrix = df[selected_columns].corr()
-
-    print(correlation_matrix)
-
-    plt.figure(figsize=(12, 10))
-    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", vmin=-1, vmax=1)
-    plt.title(title)
-    plt.show()
 
 selected_columns = [
     'result_rate_std',
@@ -1498,13 +1321,6 @@ grouped_instagram_country = grouped_instagram_country.round(2)
 grouped_instagram_country.head()
 
 text = " ".join(by_age_df['Ad Set Name'].dropna().astype(str))
-
-wc = WordCloud().generate(text)
-
-wc = WordCloud(background_color='white', colormap = 'binary',
-     stopwords = ['meta'], width = 800, height = 500).generate(text)
-plt.axis("off")
-plt.imshow(wc)
 
 incidencia_age = by_age_df_refatorado['group_campanha'].value_counts()
 incidencia_country = by_country_df_refatorado['group_campanha'].value_counts()
