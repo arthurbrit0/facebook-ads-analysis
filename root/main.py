@@ -4,14 +4,14 @@ import json
 import seaborn as sns
 import plotly.express as px
 from sklearn.cluster import KMeans
-from root.data.excel_to_csv import excel_csv
-from root.data.csv_dataframe import csv_dataframe
-from root.data.limpar_dataframe import limpar_dataframe
-from root.analysis.substituir_ad_set_por_grupo import substituir_ad_set_por_grupo
-from root.data.save_df_to_csv import save_df_to_csv
-from root.data.std_dados import std_dados
-from root.visualization.correlation_matrix import plot_correlation_matrix
-from root.consts.data_dictionary import data_dictionary
+from data.excel_to_csv import excel_csv
+from data.csv_dataframe import csv_dataframe
+from data.limpar_dataframe import limpar_dataframe
+from analysis.substituir_ad_set_por_grupo import substituir_ad_set_por_grupo
+from data.save_df_to_csv import save_df_to_csv
+from data.std_dados import std_dados
+from visualization.correlation_matrix import plot_correlation_matrix
+from consts.data_dictionary import data_dictionary
 
 path_excel = '/home/arthurbrito/Downloads/Growth-Internship-Test.xlsx'
 excel_csv(path_excel)
